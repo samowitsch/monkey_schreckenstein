@@ -28,7 +28,7 @@ Class GameScreen Extends Screen
 	Field tbounds:TileMapRect
 
 	Field startOffsetTilemapX:Int = -416, startOffsetTilemapY:Int = -160	'offset for tilemap
-	Field startOffsetPlayer1X:Int = 97, startOffsetPlayer1Y:Int = 127		'offset player1
+	Field startOffsetPlayer1X:Int = 96, startOffsetPlayer1Y:Int = 128		'offset player1
 	Field diffX:Int = 480, diffY:Int = 287
 
 	Field offsetTilemapX:Int, offsetTilemapY:Int	'offset for tilemap
@@ -81,7 +81,7 @@ Class GameScreen Extends Screen
 
     Method Start:Void()
 		Self.LoadMap()
-		Self.LoadHunter()
+		Self.LoadHunter()		
 
 		'startpoint tilemap
 		offsetTilemapX = startOffsetTilemapX
@@ -110,32 +110,24 @@ Class GameScreen Extends Screen
     End
        
     Method Render:Void()
-
 		Cls
-		' !!!!  render subpart of tilemap for Controlpixel ;o(  !!!!
-		tilemap.CustomRenderMap(offsetTilemapX+511, offsetTilemapY + 286, 10, 10, 414, 512, True)
+		' !!!!  render subpart of tilemap for Controlpixel !!!!
+		tilemap.CustomRenderMap(offsetTilemapX+512, offsetTilemapY + 286, 10, 40, 414, 512, True)
 		
-		Local pixelOffset:Int = Self.CheckControlPixel()	'get pixel offset to ramp ground if needed
-		If pixelOffset <> 0 Then
-			Self.offsetPlayer1Y += pixelOffset; Self.offsetTilemapY = Self.offsetPlayer1Y - Self.diffY
-			#rem
-			If tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = True Then				
-				Repeat
-					offsetPlayer1Y -= 1; offsetTilemapY = offsetPlayer1Y - diffY
-				Until tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = False
-				
-			Endif
-			#End
+		Local rampOffset:Int = Self.CheckControlPixel()	'get pixel offset to ramp ground if needed
+		If rampOffset <> 0 Then
+			Self.offsetPlayer1Y += rampOffset; Self.offsetTilemapY = Self.offsetPlayer1Y - Self.diffY
 		End If
 		
-		
 		' !!!! render real tilemap
-		Cls
-		tilemap.CustomRenderMap(offsetTilemapX, offsetTilemapY, SCREEN_WIDTH, SCREEN_HEIGHT - 256, tilemapOffset)
+		#If CONFIG="release"
+			Cls
+			tilemap.CustomRenderMap(offsetTilemapX, offsetTilemapY, SCREEN_WIDTH, SCREEN_HEIGHT - 256, tilemapOffset)
+		#End
 
-		currentAnimation.display(SCREEN_WIDTH/2 - 28, SCREEN_HEIGHT/2 - 32)
-		DrawImage(toolbarlayer, 0, 0)				
-								
+		currentAnimation.display(SCREEN_WIDTH2 - 28, SCREEN_HEIGHT2 - 32)
+		
+		'DrawImage(toolbarlayer, 0, 0)				
 		
 		Self.ShowDebugInfo()
 		
@@ -149,19 +141,10 @@ Class GameScreen Extends Screen
 
 	End Method
 
-
-	Method ShowDebugInfo:Void()
-		Local stat1:String = "offTM: " + offsetTilemapX + "," +offsetTilemapY + "  controlPixelFeet rgb: " + controlPixelFeet[0] + "," + controlPixelFeet[1] + "," + controlPixelFeet[2]  + "  controlPixelGround rgb: " + controlPixelGround[0] + "," + controlPixelGround[1] + "," + controlPixelGround[2]
-		fnt.Draw(stat1, 10, 10)
-		Local stat2:String = "offsetPlayer:   "+offsetPlayer1X+ "," +offsetPlayer1Y + "  tilenameBehind: " + tilemap.tilenamebehind + "  tilenameBottom: " + tilemap.tilenamebottom
-		fnt.Draw(stat2, 10, 30)
-	End
         
 	Method Update:Void()
-	
 		Self.Controls()
 		currentAnimation.update()
-				
 		tilemap.UpdateAnimation(dt.frametime)
 		
 		backButton.Update()
@@ -170,8 +153,7 @@ Class GameScreen Extends Screen
 			game.screenFade.Start(50, True)
 			game.nextScreen = menuScreen
 		End If
-
-	 End
+	End	
 
 	
 	Method Controls:Void()
@@ -185,12 +167,13 @@ Class GameScreen Extends Screen
 		Endif
 
 		tilemap.CheckCurrentTiles(offsetPlayer1X,offsetPlayer1Y)
-		If tilemap.tilenamebehind = "ladder" Then
-			Self.joyJump = False
-		End If
+'		If tilemap.tilenamebehind = "ladder" Then
+'			Self.joyJump = False
+'		End If
 		
 		currentAnimation = hunterStandingRight
 		If tilemap.tilenamebehind = "ladder" Or tilemap.tilenamebottom = "ladder" Then
+			Self.joyJump = False
 			currentAnimation = hunterClimbing
 		Endif
 
@@ -350,6 +333,10 @@ Class GameScreen Extends Screen
 			Self.hunterHit = True 
 			hunterWasHit.ResetAnim()
 		End If
+		
+		
+		tilemap.CheckCurrentTiles(offsetPlayer1X,offsetPlayer1Y)
+		
 	End Method
 		
 	Method ResetControls:Void()
@@ -488,35 +475,59 @@ Class GameScreen Extends Screen
 		Local pixelOffset:Int = 0
 		Local check1:Int = 31
 		Local check2:Int = 32
-		controlPixelFeet = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check1)
-		controlPixelGround = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check2)
-		
+
+		'TODO move into if block below when code is stable
+		Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1))
+		Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2))
+
 		If 	(Self.tilemap.tilenamebehind = "ramp" Or Self.tilemap.tilenamebottom = "ramp") Then
+
 			'over ramp ground
 			If Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] = 0 Then
 				Repeat
-					check1 += 1 ; check2 += 1 ; pixelOffset += 1
-					controlPixelFeet = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check1)
-					controlPixelGround = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check2)
+					pixelOffset += 1
+					Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset))
+					Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2 + pixelOffset))
+
+					#If CONFIG="debug"
+						Print "+ " + pixelOffset +", " + Self.controlPixelFeet[0] + ", " + Self.controlPixelGround[0] + ", " + Self.tilemap.tilenamebehind + ", " + Self.tilemap.tilenamebottom
+						SetColor(255,0,0)
+						DrawLine(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset), SCREEN_WIDTH2 + 100, (SCREEN_HEIGHT2 + check1 + pixelOffset))
+						SetColor(255,255,0)
+						DrawCircle(SCREEN_WIDTH2,(SCREEN_HEIGHT2 + check1 + pixelOffset),1)
+						SetColor(255,255,255)
+						If pixelOffset > 80 Then
+							DebugStop()
+							DebugLog("Controlpixels:" + Self.controlPixelFeet[0] + " " + Self.controlPixelGround[0] + ", " + Self.tilemap.tilenamebehind + ", " + Self.tilemap.tilenamebottom)
+						End If
+					#End
+
 				Until Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] <> 0
-			Endif
+
 			'below the ramp ground
-			If Self.controlPixelFeet[0] <> 0 And Self.controlPixelGround[0] <> 0 Then
+			Else If (Self.controlPixelFeet[0] <> 0 And Self.controlPixelGround[0] <> 0) Or 
+					(Self.controlPixelFeet[0] <> 0 And Self.controlPixelGround[0] = 0) Then
 				Repeat
-					check1 -= 1 ; check2 -= 1 ; pixelOffset -= 1
-					controlPixelFeet = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check1)
-					controlPixelGround = CustomGetPixel(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + check2)
+					pixelOffset -= 1
+					Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset))
+					Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2 + pixelOffset))
+
+					#If CONFIG="debug"
+						Print "- " + pixelOffset +", " + Self.controlPixelFeet[0] + ", " + Self.controlPixelGround[0]
+						If pixelOffset < -32 Then
+							DebugStop()
+							DebugLog("Controlpixels:" + Self.controlPixelFeet[0] + " " + Self.controlPixelGround[0])
+						End If
+					#End
+
 				Until Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] <> 0
 			Endif
 		Endif
 		Return pixelOffset
 	End Method
 	
-	
-	
-	' replace the diddy GetPixel with the mojo ReadPixels
 	Method CustomGetPixel:Int[](x:Int, y:Int)
-		Local Pixels:Int[]
+		Local Pixels:Int[1] 'store 1 pixel
 		ReadPixels(Pixels, x, y, 1, 1)
 		
 		Local a : Int = ( Pixels[0] Shr 24 ) & $ff
@@ -525,10 +536,9 @@ Class GameScreen Extends Screen
 		Local b : Int = Pixels[0] & $ff
 		
 		Local PixelValues:Int[] = [r,g,b]
+				
 		Return PixelValues
 	End Method
-	
-	
 	
 	Method LoadHunter:Void()
 		hunter = LoadImage("hunter.png",56,64,49)
@@ -544,5 +554,16 @@ Class GameScreen Extends Screen
 		hunterWasHit = New Animation(30,46,6,hunter,False)
 		currentAnimation = hunterStandingRight
 	End Method
+
+	Method ShowDebugInfo:Void()
+		Local stat1:String = "offTM: " + offsetTilemapX + "," +offsetTilemapY + "  controlPixelFeet rgb: " + controlPixelFeet[0] + "," + controlPixelFeet[1] + "," + controlPixelFeet[2]  + "  controlPixelGround rgb: " + controlPixelGround[0] + "," + controlPixelGround[1] + "," + controlPixelGround[2]
+		fnt.Draw(stat1, 10, 10)
+		Local stat2:String = "offsetPlayer:   "+offsetPlayer1X+ "," +offsetPlayer1Y + "  tilenameBehind: " + tilemap.tilenamebehind + "  tilenameBottom: " + tilemap.tilenamebottom
+		fnt.Draw(stat2, 10, 30)
+		
+		#If CONFIG="debug"
+			DrawText "X: " + MouseX + ", Y: " + MouseY, MouseX, MouseY
+		#End	
+	End
 End
 

@@ -50,9 +50,9 @@ Class Animation
 		Self.y = y
 		DrawImage images,x,y,index
 		
-		'#If CONFIG="debug"
+		#If CONFIG="debug"
 			Self.DrawBounds()
-		'#End			
+		#End			
 		
 		Return 0
 	End Method

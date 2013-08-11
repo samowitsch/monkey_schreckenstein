@@ -24,8 +24,10 @@ Class CustomTileMap Extends TileMap
 	Field stat:TilePlayerStatus = New TilePlayerStatus
 	Field tile:TileMapTile = New TileMapTile
 	Field tileproperties:TileMapProperties = New TileMapProperties
+	
 	Field tilenamebehind:String = ""
 	Field tilenamebottom:String = ""
+	
 	Field layer:TileMapLayer
 	Field tl:TileMapTileLayer
 	Field px:Int	'xpos of player
@@ -167,7 +169,7 @@ Class CustomTileMap Extends TileMap
 	
 		'check for tile standing in front of
 		Self.py = y / 32
-		Self.px = (x+32) / 32
+		Self.px = (x + 32) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus offset center of bottom
 		'Self.layer = Self.layers.GetFirst()
 		'Self.tl = TileMapTileLayer(layer)
@@ -181,9 +183,8 @@ Class CustomTileMap Extends TileMap
 		Endif
 		
 		'check for tile standing on top
-		y += 1
-		Self.py = y / 32
-		Self.px = (x+32) / 32
+		Self.py = (y + 1) / 32
+		Self.px = (x + 32) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus offset center of bottom
 		gid = Self.tl.mapData.cells[Self.pc].gid - 1
 		If gid < 0 Then
@@ -201,8 +202,8 @@ Class CustomTileMap Extends TileMap
 	Method CheckCollisionTop:Bool(x:Int,y:Int)
 		'reference point top middle
 		'Self.py = (y-64) / 32
-		Self.py = (y-50) / 32
-		Self.px = (x+32) / 32
+		Self.py = (y - 50) / 32
+		Self.px = (x + 32) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus offset center of bottom
 		Return Self.CheckHitOfReferencePoint()
 	End Method
@@ -220,14 +221,14 @@ Class CustomTileMap Extends TileMap
 	Method CheckCollisionLeft:Bool(x:Int,y:Int)
 		'reference point bottom left
 		Self.py = y / 32
-		Self.px = (x+12) / 32
+		Self.px = (x + 12) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus plus offset center of bottom
 		If Self.CheckHitOfReferencePoint() Then
 			Return True
 		End If
 		'reference point top left
-		Self.py = (y-30) / 32
-		Self.px = (x+8) / 32
+		Self.py = (y - 30) / 32
+		Self.px = (x + 8) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus plus offset center of bottom
 		If Self.CheckHitOfReferencePoint() Then
 			Return True
@@ -237,14 +238,14 @@ Class CustomTileMap Extends TileMap
 	Method CheckCollisionRight:Bool(x:Int,y:Int)
 		'reference point bottom right
 		Self.py = y / 32
-		Self.px = (x+52) / 32
+		Self.px = (x + 52) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus plus offset center of bottom
 		If Self.CheckHitOfReferencePoint() Then
 			Return True
 		End If
 		'reference point top right
-		Self.py = (y-30) / 32
-		Self.px = (x+56) / 32
+		Self.py = (y - 30) / 32
+		Self.px = (x + 56) / 32
 		Self.pc = Self.py * 126 + Self.px 'plus plus offset center of bottom
 		If Self.CheckHitOfReferencePoint() Then
 			Return True

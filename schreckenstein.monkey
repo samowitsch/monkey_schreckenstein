@@ -20,7 +20,6 @@ Function Main:Int()
         Return 0
 End
 
-
 Class Schreckenstein Extends DiddyApp
 	Method OnCreate:Int()
 		SetUpdateRate(60)
@@ -31,7 +30,7 @@ Class Schreckenstein Extends DiddyApp
 		menuScreen = New MenuScreen
 		menuScreen.PreStart()
 
-		SetScreenSize(1024, 768) 'diddys VirtualResolution, maybe a solution for retina issues
+		'SetScreenSize(1024, 768) 'diddys VirtualResolution, maybe a solution for retina issues
 		Return 0
 	End	
 End
