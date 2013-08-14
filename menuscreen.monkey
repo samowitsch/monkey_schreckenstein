@@ -21,8 +21,7 @@ Class MenuScreen Extends Screen
         
       Method Start:Void()
 
-            game.screenFade.Start(50, False)
-																														gameScreen = New GameScreen
+       	game.screenFade.Start(50, False)
 		gameScreen = New GameScreen
 		
 		startMenu = New SimpleMenu("","",SCREEN_WIDTH2/2,100,50,True)
@@ -32,47 +31,48 @@ Class MenuScreen Extends Screen
 		startMenu.AddButton("btn-level4.png","btn-level4.png","level4")
 		startMenu.AddButton("btn-level5.png","btn-level5.png","level5")
 
-        End
+	End
         
-        Method Render:Void()
-	        Cls
-		  startMenu.Draw()
+	Method Render:Void()
+		Cls
+		startMenu.Draw()
 		
-        End
+	End
         
-        Method Update:Void()
-
+	Method Update:Void()
 		startMenu.Update()
 		If startMenu.Clicked("level1")
 			currentLevel = "maps/schreck-lvl1.xml"
-                  game.screenFade.Start(50, True)
-                  game.nextScreen = gameScreen
+			game.screenFade.Start(50, True)
+			game.nextScreen = gameScreen
 		End
 		If startMenu.Clicked("level2")
 			currentLevel = "maps/schreck-lvl2.xml"
-                  game.screenFade.Start(50, True)
-                  game.nextScreen = gameScreen
+			game.screenFade.Start(50, True)
+			game.nextScreen = gameScreen
 		End
 		If startMenu.Clicked("level3")
-			currentLevel = "maps/schreck-lvl1.xml"
-                  game.screenFade.Start(50, True)
-                  game.nextScreen = gameScreen
+			currentLevel = "maps/schreck-lvl3.xml"
+			game.screenFade.Start(50, True)
+ 			game.nextScreen = gameScreen
 		End
+		#rem
 		If startMenu.Clicked("level4")
 			currentLevel = "maps/schreck-lvl1.xml"
-                  game.screenFade.Start(50, True)
-                  game.nextScreen = gameScreen
+			game.screenFade.Start(50, True)
+			game.nextScreen = gameScreen
 		End
 		If startMenu.Clicked("level5")
 			currentLevel = "maps/schreck-lvl1.xml"
-                  game.screenFade.Start(50, True)
-                  game.nextScreen = gameScreen
+			game.screenFade.Start(50, True)
+			game.nextScreen = gameScreen
 		End
+		#end
 		
 		
-            If KeyHit(KEY_ESCAPE)
-                    game.screenFade.Start(50, True)
-                    game.nextScreen = gameScreen
-            End
-        End
+		If KeyHit(KEY_ESCAPE)
+			game.screenFade.Start(50, True)
+			game.nextScreen = gameScreen
+		End
+	End
 End
