@@ -1,3 +1,5 @@
+Strict
+
 Import mojo
 
 Class Animation
@@ -50,6 +52,7 @@ Class Animation
 		Self.y = y
 		DrawImage images,x,y,index
 		
+		'TODO remove if not needed see below
 		#If CONFIG="debug"
 			Self.DrawBounds()
 		#End			
@@ -57,6 +60,7 @@ Class Animation
 		Return 0
 	End Method
 	
+	'TODO remove this stuff if animation class is used for other sprites 
 	Method DrawBounds:Void()
 		SetColor(255,0,0)
 		DrawCircle Self.x+28,Self.y+32,2 'mitte

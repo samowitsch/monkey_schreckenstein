@@ -1,3 +1,5 @@
+Strict
+
 Import monkey.map
 
 Import diddy.base64
@@ -42,9 +44,6 @@ Class GameScreen Extends Screen
 	
 	Field player:PlayerSprite = New PlayerSprite()
   Field controlPixel:ControlPixel = New ControlPixel()
-
-	Field controlPixelFeet:Int[3]		'controlPixelFeet for ramp tilemaps
-	Field controlPixelGround:Int[3]		'controlPixelGround for ramp tilemaps
 	
 	Field joyLeft:Bool = False
 	Field joyRight:Bool = False
@@ -86,7 +85,6 @@ Class GameScreen Extends Screen
     backButton.Load("btn-home.png","btn-home.png","","")
     backButton.MoveTo(10,50)
     backButton.Update()
-
     
     game.screenFade.Start(50, False)
   End
@@ -128,6 +126,7 @@ Class GameScreen Extends Screen
 
 
 	Method Update:Void()
+
 		Self.Controls()
 		
 		player.Update()
@@ -135,7 +134,8 @@ Class GameScreen Extends Screen
 		tilemap.UpdateAnimation(dt.frametime)
 		
 		backButton.Update()
-		If backButton.clicked = 1 Then
+		
+		If KeyHit(KEY_ESCAPE) Or backButton.clicked = 1 Then
 			StopMusic()
 			game.screenFade.Start(50, True)
 			game.nextScreen = menuScreen
@@ -160,11 +160,6 @@ Class GameScreen Extends Screen
 			Self.joyJump = False
 			player.currentAnimation = player.hunterClimbing
 		Endif
-
-		If KeyHit(KEY_ESCAPE)
-	        game.screenFade.Start(50, True)
-	        game.nextScreen = menuScreen
-		End
 		
 		If player.hunterIsFalling = True Then Self.joyJump = False
 		
@@ -411,8 +406,6 @@ Class GameScreen Extends Screen
 		End If
 	End Method
 	
-
-		
 	Method UpdateStick:Void()
 		If mystick.GetTouchNumber() < 0 Then
 			#if TARGET="android" Or TARGET="ios" Then
@@ -454,7 +447,7 @@ Class GameScreen Extends Screen
 	End Method
 
 	Method ShowDebugInfo:Void()
-		Local stat1:String = "offTM: " + offsetTilemapX + "," +offsetTilemapY + "  controlPixelFeet rgb: " + controlPixelFeet[0] + "," + controlPixelFeet[1] + "," + controlPixelFeet[2]  + "  controlPixelGround rgb: " + controlPixelGround[0] + "," + controlPixelGround[1] + "," + controlPixelGround[2]
+		Local stat1:String = "offTM: " + offsetTilemapX + "," +offsetTilemapY + "  controlPixelFeet rgb: " + Self.controlPixel.controlPixelFeet[0] + "," + Self.controlPixel.controlPixelFeet[1] + "," + Self.controlPixel.controlPixelFeet[2]  + "  controlPixelGround rgb: " + Self.controlPixel.controlPixelGround[0] + "," + Self.controlPixel.controlPixelGround[1] + "," + Self.controlPixel.controlPixelGround[2]
 		font.Draw(stat1, 10, 10)
 		Local stat2:String = "offsetPlayer:   "+offsetPlayer1X+ "," +offsetPlayer1Y + "  tilenameBehind: " + tilemap.tilenamebehind + "  tilenameBottom: " + tilemap.tilenamebottom
 		font.Draw(stat2, 10, 30)

@@ -1,3 +1,5 @@
+Strict
+
 Class Jump
 	Field currentFrame:Int = 0
 	Field delayFrame:Int = 0

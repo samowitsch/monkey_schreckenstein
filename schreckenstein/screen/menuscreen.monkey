@@ -1,8 +1,9 @@
+Strict
+
 Import mojo
 Import diddy
 Import schreckenstein
 Import schreckenstein.screen.gamescreen
-
 
 Global startMenu:SimpleMenu			'start menu
 
@@ -63,11 +64,6 @@ Class MenuScreen Extends Screen
 			game.nextScreen = gameScreen
 		End
 		#end
-		
-		
-		If KeyHit(KEY_ESCAPE)
-			game.screenFade.Start(50, True)
-			game.nextScreen = gameScreen
-		End
+
 	End
 End
