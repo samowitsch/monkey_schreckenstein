@@ -38,7 +38,6 @@ Class GameScreen Extends Screen
 	Field offsetTilemapX:Int, offsetTilemapY:Int	'offset for tilemap
 	Field offsetPlayer1X:Int, offsetPlayer1Y:Int	'offset player1
 
-	Field str$
 	Field scrollSpeedX:Int = 7
 	Field scrollSpeedY:Int = 4
 	
@@ -91,7 +90,7 @@ Class GameScreen Extends Screen
        
   Method Render:Void()
     Cls
-    ' !!!!  render subpart of tilemap for Controlpixel !!!!
+    ' !!!!  render subpart of tilemap for Controlpixel only if a ramp tile is located !!!!
     If 	(Self.tilemap.tilenamebehind = "ramp" Or Self.tilemap.tilenamebottom = "ramp") Then
       tilemap.CustomRenderMap(offsetTilemapX+512, offsetTilemapY + 286, 10, 40, 414, 512, True)
       
@@ -121,20 +120,15 @@ Class GameScreen Extends Screen
   End
 
 	Method ExtraRender:Void()
-
 	End Method
 
 
 	Method Update:Void()
-
 		Self.Controls()
-		
 		player.Update()
-		
 		tilemap.UpdateAnimation(dt.frametime)
-		
 		backButton.Update()
-		
+
 		If KeyHit(KEY_ESCAPE) Or backButton.clicked = 1 Then
 			StopMusic()
 			game.screenFade.Start(50, True)

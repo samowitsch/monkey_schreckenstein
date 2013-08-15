@@ -3,11 +3,17 @@ Strict
 Import mojo
 Import schreckenstein.sprite.animation
 Import schreckenstein.sprite.jump
+Import schreckenstein.sprite.basicsprite
+Import schreckenstein.sprite.weaponsprite
 Import diddy.framework
 
-Class PlayerSprite
+Class PlayerSprite Extends BasicSprite
 
 	Field hunter:Image
+	
+	'the player can throw a maximum of two axes at a time, till they hit an enemy or an background tile
+	'they would be reflected from ground and ceiling
+	Field weapons:WeaponSprite[2]   
 
 	Field hunterWalkingLeft:Animation
 	Field hunterWalkingRight:Animation
