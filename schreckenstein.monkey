@@ -6,8 +6,8 @@ Strict
 
 Import mojo
 Import diddy
-Import gamescreen
-Import menuscreen
+Import schreckenstein.screen.menuscreen
+Import schreckenstein.screen.gamescreen
 
 Global menuScreen:MenuScreen
 Global gameScreen:GameScreen

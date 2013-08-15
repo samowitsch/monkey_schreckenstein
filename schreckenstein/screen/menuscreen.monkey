@@ -1,7 +1,7 @@
 Import mojo
 Import diddy
 Import schreckenstein
-Import gamescreen
+Import schreckenstein.screen.gamescreen
 
 
 Global startMenu:SimpleMenu			'start menu
@@ -13,8 +13,6 @@ Class MenuScreen Extends Screen
 	Field deltaTime:Int = -1
 
 	Field tween:Tween
-
-
       Method New()
       	name = "MenuScreen"
       End

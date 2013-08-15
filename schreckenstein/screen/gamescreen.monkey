@@ -6,20 +6,22 @@ Import diddy.framework
 Import diddy.xml
 Import diddy.tile
 
-Import customtilemap
 Import fantomEngine.cftFont		'needed for font drawing
-Import virtualstick
-Import animation
-Import buttons
-Import jump
-Import menuscreen
 
+Import schreckenstein.tilemap.customtilemap
+Import schreckenstein.screen.menuscreen
+Import schreckenstein.ui.virtualstick
+Import schreckenstein.ui.buttons
+Import schreckenstein.sprite.animation
+Import schreckenstein.sprite.jump
+Import schreckenstein.sprite.playersprite
+Import schreckenstein.tools.controlpixel
 
 Class GameScreen Extends Screen
 
 	Field backButton:SimpleButton = New SimpleButton()
 
-	Field fnt:ftFont				' fantomEngine font class ftFont
+	Field font:ftFont = New ftFont()				' fantomEngine font class ftFont
 	Field tilemap:CustomTileMap		' extended Diddy TileMap class, no local modified Diddy FW anymore ;o)
 	
 	Field toolbarlayer:Image
@@ -37,25 +39,12 @@ Class GameScreen Extends Screen
 	Field str$
 	Field scrollSpeedX:Int = 7
 	Field scrollSpeedY:Int = 4
-
-	Field hunterWalkingLeft:Animation
-	Field hunterWalkingRight:Animation
-	Field hunterStandingRight:Animation
-	Field hunterStandingLeft:Animation
-	Field hunterClimbing:Animation
-	Field hunterJumpLeft:Animation
-	Field hunterJumpRight:Animation
-	Field hunterStolenItem:Animation
-	Field hunterWasHit:Animation
-	Field hunterHit:Bool = False
-	Field hunterIsFalling:Bool = False
-	Field hunterIsClimbing:Bool = False
-	Field hunterStolen:Bool = False
-	Field hunterJumpControl:Jump = New Jump
 	
+	Field player:PlayerSprite = New PlayerSprite()
+  Field controlPixel:ControlPixel = New ControlPixel()
+
 	Field controlPixelFeet:Int[3]		'controlPixelFeet for ramp tilemaps
 	Field controlPixelGround:Int[3]		'controlPixelGround for ramp tilemaps
-
 	
 	Field joyLeft:Bool = False
 	Field joyRight:Bool = False
@@ -68,83 +57,81 @@ Class GameScreen Extends Screen
 	Field analogUp:Bool = False
 	Field analogDown:Bool = False
 	
-	Field currentAnimation:Animation
-	Field hunter:Image
-
 	' our virtual stick and buttons
-	Field mystick:MyStick
-	Field buttons:Buttons
+	Field mystick:MyStick = New MyStick
+	Field buttons:Buttons = New Buttons
 
-    Method New()
-    	name = "GameScreen"
+  Method New()
+    name = "GameScreen"
 	End
 
-    Method Start:Void()
-		Self.LoadMap()
-		Self.LoadHunter()		
+  Method Start:Void()
+    Self.LoadMap()
+    'Self.LoadHunter()		
 
-		'startpoint tilemap
-		offsetTilemapX = startOffsetTilemapX
-		offsetTilemapY = startOffsetTilemapY
-		
-		'startpoint player1
-		offsetPlayer1X = startOffsetPlayer1X
-		offsetPlayer1Y = startOffsetPlayer1Y
-		
-		toolbarlayer = LoadImage("toolbar.png")
-		SetMusicVolume(0.75)
-		PlayMusic("beat.mp3", 1)
-		
-		fnt = New ftFont()	'use fantomEngine class ftFont for text drawing
-		fnt.Load("atd_font")
+    'startpoint tilemap
+    offsetTilemapX = startOffsetTilemapX
+    offsetTilemapY = startOffsetTilemapY
+    
+    'startpoint player1
+    offsetPlayer1X = startOffsetPlayer1X
+    offsetPlayer1Y = startOffsetPlayer1Y
+    
+    toolbarlayer = LoadImage("toolbar.png")
+    SetMusicVolume(0.75)
+    PlayMusic("beat.mp3", 1)
+    
+    font.Load("atd_font")
+    
+    backButton.Load("btn-home.png","btn-home.png","","")
+    backButton.MoveTo(10,50)
+    backButton.Update()
 
-		mystick = New MyStick
-		buttons = New Buttons
-		
-		backButton.Load("btn-home.png","btn-home.png","","")
-		backButton.MoveTo(10,50)
-		backButton.Update()
-
-		
-		game.screenFade.Start(50, False)
-    End
+    
+    game.screenFade.Start(50, False)
+  End
        
-    Method Render:Void()
-		Cls
-		' !!!!  render subpart of tilemap for Controlpixel !!!!
-		tilemap.CustomRenderMap(offsetTilemapX+512, offsetTilemapY + 286, 10, 40, 414, 512, True)
-		
-		Local rampOffset:Int = Self.CheckControlPixel()	'get pixel offset to ramp ground if needed
-		If rampOffset <> 0 Then
-			Self.offsetPlayer1Y += rampOffset; Self.offsetTilemapY = Self.offsetPlayer1Y - Self.diffY
-		End If
-		
-		' !!!! render real tilemap
-		#If CONFIG="release"
-			Cls
-			tilemap.CustomRenderMap(offsetTilemapX, offsetTilemapY, SCREEN_WIDTH, SCREEN_HEIGHT - 256, tilemapOffset)
-		#End
+  Method Render:Void()
+    Cls
+    ' !!!!  render subpart of tilemap for Controlpixel !!!!
+    If 	(Self.tilemap.tilenamebehind = "ramp" Or Self.tilemap.tilenamebottom = "ramp") Then
+      tilemap.CustomRenderMap(offsetTilemapX+512, offsetTilemapY + 286, 10, 40, 414, 512, True)
+      
+      Local rampOffset:Int = controlPixel.CheckControlPixel()	'get pixel offset to ramp ground if needed
+      If rampOffset <> 0 Then
+        Self.offsetPlayer1Y += rampOffset; Self.offsetTilemapY = Self.offsetPlayer1Y - Self.diffY
+      End If
+    End If
 
-		currentAnimation.display(SCREEN_WIDTH2 - 28, SCREEN_HEIGHT2 - 32)
-		
-		'DrawImage(toolbarlayer, 0, 0)				
-		
-		Self.ShowDebugInfo()
-		
-		mystick.Render()
-		buttons.RenderButtons()
-		FPSCounter.Draw(10,0)
-		backButton.Draw()
-    End
+    
+    ' !!!! render real tilemap
+    #If CONFIG="release"
+      Cls
+      tilemap.CustomRenderMap(offsetTilemapX, offsetTilemapY, SCREEN_WIDTH, SCREEN_HEIGHT - 256, tilemapOffset)
+    #End
+
+    player.Draw()
+    
+    'DrawImage(toolbarlayer, 0, 0)				
+    
+    Self.ShowDebugInfo()
+    
+    mystick.Render()
+    buttons.RenderButtons()
+    FPSCounter.Draw(10,0)
+    backButton.Draw()
+  End
 
 	Method ExtraRender:Void()
 
 	End Method
 
-        
+
 	Method Update:Void()
 		Self.Controls()
-		currentAnimation.update()
+		
+		player.Update()
+		
 		tilemap.UpdateAnimation(dt.frametime)
 		
 		backButton.Update()
@@ -161,20 +148,17 @@ Class GameScreen Extends Screen
 		Self.ResetControls()
 		Self.UpdateControls()
 		
-		hunterClimbing.stopped = True
+		player.hunterClimbing.stopped = True
 		If Self.joyLeft Or Self.joyRight Or Self.joyUp Or Self.joyDown Then
-			hunterClimbing.stopped = False
+			player.hunterClimbing.stopped = False
 		Endif
 
 		tilemap.CheckCurrentTiles(offsetPlayer1X,offsetPlayer1Y)
-'		If tilemap.tilenamebehind = "ladder" Then
-'			Self.joyJump = False
-'		End If
 		
-		currentAnimation = hunterStandingRight
+		player.currentAnimation = player.hunterStandingRight
 		If tilemap.tilenamebehind = "ladder" Or tilemap.tilenamebottom = "ladder" Then
 			Self.joyJump = False
-			currentAnimation = hunterClimbing
+			player.currentAnimation = player.hunterClimbing
 		Endif
 
 		If KeyHit(KEY_ESCAPE)
@@ -182,7 +166,7 @@ Class GameScreen Extends Screen
 	        game.nextScreen = menuScreen
 		End
 		
-		If Self.hunterIsFalling = True Then Self.joyJump = False
+		If player.hunterIsFalling = True Then Self.joyJump = False
 		
 		'jumping
 		If Self.joyJump Then
@@ -190,10 +174,10 @@ Class GameScreen Extends Screen
 			'jump left
 			If Self.joyLeft Then
 
-				currentAnimation = hunterJumpLeft
+				player.currentAnimation = player.hunterJumpLeft
 				'jump routine left
-				offsetPlayer1X -= Self.hunterJumpControl.GetJumpX(); offsetTilemapX = offsetPlayer1X - diffX
-				offsetPlayer1Y -= Self.hunterJumpControl.GetJumpY(); offsetTilemapY = offsetPlayer1Y - diffY
+				offsetPlayer1X -= player.hunterJumpControl.GetJumpX(); offsetTilemapX = offsetPlayer1X - diffX
+				offsetPlayer1Y -= player.hunterJumpControl.GetJumpY(); offsetTilemapY = offsetPlayer1Y - diffY
 				
 				If  tilemap.CheckCollisionTop(offsetPlayer1X,offsetPlayer1Y) = True Then
 					Repeat
@@ -201,17 +185,17 @@ Class GameScreen Extends Screen
 					Until tilemap.CheckCollisionTop(offsetPlayer1X,offsetPlayer1Y) = False
 				End If
 				If tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = True Then
-					Self.hunterIsFalling = False
+					player.hunterIsFalling = False
 					Self.joyJump = False
-					Self.hunterJumpControl.Reset()
+					player.hunterJumpControl.Reset()
 					Repeat
 						offsetPlayer1Y -= 1; offsetTilemapY = offsetPlayer1Y - diffY
 					Until tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = False
 				Endif
 				If  tilemap.CheckCollisionLeft(offsetPlayer1X,offsetPlayer1Y) = True Then
 					Self.joyJump = False
-					Self.hunterJumpControl.Reset()
-					Self.hunterIsFalling = True
+					player.hunterJumpControl.Reset()
+					player.hunterIsFalling = True
 					Repeat
 						offsetPlayer1X += 1; offsetTilemapX = offsetPlayer1X - diffX
 					Until tilemap.CheckCollisionLeft(offsetPlayer1X,offsetPlayer1Y) = False
@@ -220,10 +204,10 @@ Class GameScreen Extends Screen
 			'jump right
 			Elseif Self.joyRight Then
 
-				currentAnimation = hunterJumpRight
+				player.currentAnimation = player.hunterJumpRight
 				'jump routine right
-				offsetPlayer1X += Self.hunterJumpControl.GetJumpX(); offsetTilemapX = offsetPlayer1X - diffX 
-				offsetPlayer1Y -= Self.hunterJumpControl.GetJumpY(); offsetTilemapY = offsetPlayer1Y - diffY
+				offsetPlayer1X += player.hunterJumpControl.GetJumpX(); offsetTilemapX = offsetPlayer1X - diffX 
+				offsetPlayer1Y -= player.hunterJumpControl.GetJumpY(); offsetTilemapY = offsetPlayer1Y - diffY
 				
 
 				If  tilemap.CheckCollisionTop(offsetPlayer1X,offsetPlayer1Y) = True Then
@@ -232,17 +216,17 @@ Class GameScreen Extends Screen
 					Until tilemap.CheckCollisionTop(offsetPlayer1X,offsetPlayer1Y) = False
 				End If
 				If  tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = True Then
-					Self.hunterIsFalling = False
+					player.hunterIsFalling = False
 					Self.joyJump = False
-					Self.hunterJumpControl.Reset()
+					player.hunterJumpControl.Reset()
 					Repeat
 						offsetPlayer1Y -= 1; offsetTilemapY = offsetPlayer1Y - diffY
 					Until tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = False
 				Endif
 				If  tilemap.CheckCollisionRight(offsetPlayer1X,offsetPlayer1Y) = True Then
 					Self.joyJump = False
-					Self.hunterJumpControl.Reset()
-					Self.hunterIsFalling = True
+					player.hunterJumpControl.Reset()
+					player.hunterIsFalling = True
 					Repeat
 						offsetPlayer1X -= 1; offsetTilemapX = offsetPlayer1X - diffX
 					Until tilemap.CheckCollisionRight(offsetPlayer1X,offsetPlayer1Y) = False
@@ -251,26 +235,26 @@ Class GameScreen Extends Screen
 			End If
 
 
-			If Self.hunterJumpControl.Update() = False Then
+			If player.hunterJumpControl.Update() = False Then
 				Self.joyJump = False
-				Self.hunterJumpControl.Reset()
+				player.hunterJumpControl.Reset()
 			End If
 		Else
 			
-			If Self.hunterStolen = True Then
-				currentAnimation = hunterStolenItem
-			Elseif Self.hunterHit = True Then
-				currentAnimation = hunterWasHit
+			If player.hunterStolen = True Then
+				player.currentAnimation = player.hunterStolenItem
+			Elseif player.hunterHit = True Then
+				player.currentAnimation = player.hunterWasHit
 			Else
 				If tilemap.CheckFalling(offsetPlayer1X,offsetPlayer1Y) Then
-					Self.hunterIsFalling = True
-					currentAnimation = hunterStandingRight
+					player.hunterIsFalling = True
+					player.currentAnimation = player.hunterStandingRight
 					offsetPlayer1Y += 5; offsetTilemapY = offsetPlayer1Y - diffY
 					If  tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = True Then
 						Repeat
 							offsetPlayer1Y -= 1; offsetTilemapY = offsetPlayer1Y - diffY
 						Until tilemap.CheckCollisionBottom(offsetPlayer1X,offsetPlayer1Y) = False
-						Self.hunterIsFalling = False
+						player.hunterIsFalling = False
 					End If
 					
 				'climbing up?
@@ -295,8 +279,10 @@ Class GameScreen Extends Screen
 				
 				'running left
 				Else If Self.joyLeft Then
-					Self.hunterIsFalling = False
-					If tilemap.tilenamebehind <> "ladder" Then currentAnimation = hunterWalkingLeft	
+					player.hunterIsFalling = False
+					If tilemap.tilenamebehind <> "ladder" Then 
+            player.currentAnimation = player.hunterWalkingLeft
+          End If
 					offsetPlayer1X -= scrollSpeedX; offsetTilemapX = offsetPlayer1X - diffX
 					If  tilemap.CheckCollisionLeft(offsetPlayer1X,offsetPlayer1Y) = True Then
 						Repeat
@@ -306,8 +292,10 @@ Class GameScreen Extends Screen
 					
 				'running right
 				Else If Self.joyRight Then
-					Self.hunterIsFalling = False
-					If tilemap.tilenamebehind <> "ladder" Then currentAnimation = hunterWalkingRight
+					player.hunterIsFalling = False
+					If tilemap.tilenamebehind <> "ladder" Then 
+            player.currentAnimation = player.hunterWalkingRight
+					End If
 					offsetPlayer1X += scrollSpeedX; offsetTilemapX = offsetPlayer1X - diffX
 					If  tilemap.CheckCollisionRight(offsetPlayer1X,offsetPlayer1Y) = True Then
 						Repeat
@@ -321,17 +309,17 @@ Class GameScreen Extends Screen
 		
 		'test keys ;o)
 		If KeyDown( KEY_S ) Then
-			Self. hunterStolen = True
-			hunterStolenItem.ResetAnim()
+			player.hunterStolen = True
+			player.hunterStolenItem.ResetAnim()
 		Elseif KeyHit( KEY_A ) Then
 			Print "GetDX:" + mystick.GetDX() + "     GetDY:" + mystick.GetDY()
 		Elseif KeyDown( KEY_R ) Then
 			Print "UpdateRate:" + GetUpdateRate()
-			Self.hunterHit = False
-			Self.hunterStolen = False
+			player.hunterHit = False
+			player.hunterStolen = False
 		Elseif KeyDown( KEY_H ) Then
-			Self.hunterHit = True 
-			hunterWasHit.ResetAnim()
+			player.hunterHit = True 
+			player.hunterWasHit.ResetAnim()
 		End If
 		
 		
@@ -465,101 +453,11 @@ Class GameScreen Extends Screen
 		tbounds = tilemap.GetBounds()
 	End Method
 
-	#rem
-	CheckControlPixel and "calculate" offset to the ramp ground
-	
-	@return Int pixelOffset
-	#end
-	
-	Method CheckControlPixel:Int()
-		Local pixelOffset:Int = 0
-		Local check1:Int = 31
-		Local check2:Int = 32
-
-		'TODO move into if block below when code is stable
-		Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1))
-		Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2))
-
-		If 	(Self.tilemap.tilenamebehind = "ramp" Or Self.tilemap.tilenamebottom = "ramp") Then
-
-			'over ramp ground
-			If Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] = 0 Then
-				Repeat
-					pixelOffset += 1
-					Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset))
-					Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2 + pixelOffset))
-
-					#If CONFIG="debug"
-						Print "+ " + pixelOffset +", " + Self.controlPixelFeet[0] + ", " + Self.controlPixelGround[0] + ", " + Self.tilemap.tilenamebehind + ", " + Self.tilemap.tilenamebottom
-						SetColor(255,0,0)
-						DrawLine(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset), SCREEN_WIDTH2 + 100, (SCREEN_HEIGHT2 + check1 + pixelOffset))
-						SetColor(255,255,0)
-						DrawCircle(SCREEN_WIDTH2,(SCREEN_HEIGHT2 + check1 + pixelOffset),1)
-						SetColor(255,255,255)
-						If pixelOffset > 80 Then
-							DebugStop()
-							DebugLog("Controlpixels:" + Self.controlPixelFeet[0] + " " + Self.controlPixelGround[0] + ", " + Self.tilemap.tilenamebehind + ", " + Self.tilemap.tilenamebottom)
-						End If
-					#End
-
-				Until Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] <> 0
-
-			'below the ramp ground
-			Else If (Self.controlPixelFeet[0] <> 0 And Self.controlPixelGround[0] <> 0) Or 
-					(Self.controlPixelFeet[0] <> 0 And Self.controlPixelGround[0] = 0) Then
-				Repeat
-					pixelOffset -= 1
-					Self.controlPixelFeet = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check1 + pixelOffset))
-					Self.controlPixelGround = CustomGetPixel(SCREEN_WIDTH2, (SCREEN_HEIGHT2 + check2 + pixelOffset))
-
-					#If CONFIG="debug"
-						Print "- " + pixelOffset +", " + Self.controlPixelFeet[0] + ", " + Self.controlPixelGround[0]
-						If pixelOffset < -32 Then
-							DebugStop()
-							DebugLog("Controlpixels:" + Self.controlPixelFeet[0] + " " + Self.controlPixelGround[0])
-						End If
-					#End
-
-				Until Self.controlPixelFeet[0] = 0 And Self.controlPixelGround[0] <> 0
-			Endif
-		Endif
-		Return pixelOffset
-	End Method
-	
-	Method CustomGetPixel:Int[](x:Int, y:Int)
-		Local Pixels:Int[1] 'store 1 pixel
-		ReadPixels(Pixels, x, y, 1, 1)
-		
-		Local a : Int = ( Pixels[0] Shr 24 ) & $ff
-		Local r : Int = ( Pixels[0] Shr 16 ) & $ff
-		Local g : Int = ( Pixels[0] Shr 8 ) & $ff
-		Local b : Int = Pixels[0] & $ff
-		
-		Local PixelValues:Int[] = [r,g,b]
-				
-		Return PixelValues
-	End Method
-	
-	Method LoadHunter:Void()
-		hunter = LoadImage("hunter.png",56,64,49)
-		hunterWalkingRight = New Animation(0,6,3,hunter)'first frame, last frame ,duration, animated image set
-		hunterWalkingLeft = New Animation(7,13,3,hunter)
-		hunterStandingRight = New Animation(14,14,4,hunter)
-		hunterStandingLeft = New Animation(14,14,4,hunter)
-		hunterClimbing = New Animation(15,23,4,hunter)
-		hunterClimbing.stopped = True
-		hunterJumpRight = New Animation(24,24,4,hunter)
-		hunterJumpLeft = New Animation(25,25,4,hunter)
-		hunterStolenItem = New Animation(26,29,20,hunter,False)
-		hunterWasHit = New Animation(30,46,6,hunter,False)
-		currentAnimation = hunterStandingRight
-	End Method
-
 	Method ShowDebugInfo:Void()
 		Local stat1:String = "offTM: " + offsetTilemapX + "," +offsetTilemapY + "  controlPixelFeet rgb: " + controlPixelFeet[0] + "," + controlPixelFeet[1] + "," + controlPixelFeet[2]  + "  controlPixelGround rgb: " + controlPixelGround[0] + "," + controlPixelGround[1] + "," + controlPixelGround[2]
-		fnt.Draw(stat1, 10, 10)
+		font.Draw(stat1, 10, 10)
 		Local stat2:String = "offsetPlayer:   "+offsetPlayer1X+ "," +offsetPlayer1Y + "  tilenameBehind: " + tilemap.tilenamebehind + "  tilenameBottom: " + tilemap.tilenamebottom
-		fnt.Draw(stat2, 10, 30)
+		font.Draw(stat2, 10, 30)
 		
 		#If CONFIG="debug"
 			DrawText "X: " + MouseX + ", Y: " + MouseY, MouseX, MouseY

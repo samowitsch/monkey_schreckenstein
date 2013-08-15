@@ -23,7 +23,7 @@ Class Animation
 		delay = 0
 	End Method
 
-	Method update:Int()
+	Method Update:Int()
 		If Self.stopped = False Then
 			delay = delay + 1
 			If delay > duration
@@ -45,7 +45,7 @@ Class Animation
 		Self.index = Self.firstFrame
 	End
 	
-	Method display:Int(x:Int,y:Int)
+	Method Draw:Int(x:Int,y:Int)
 		Self.x = x
 		Self.y = y
 		DrawImage images,x,y,index
