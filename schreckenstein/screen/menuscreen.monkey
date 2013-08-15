@@ -13,28 +13,25 @@ Class MenuScreen Extends Screen
 	Field deltaTime:Int = -1
 
 	Field tween:Tween
-      Method New()
-      	name = "MenuScreen"
-      End
-        
-      Method Start:Void()
+  Method New()
+    name = "MenuScreen"
+  End
 
-       	game.screenFade.Start(50, False)
-		gameScreen = New GameScreen
-		
-		startMenu = New SimpleMenu("","",SCREEN_WIDTH2/2,100,50,True)
-		startMenu.AddButton("btn-level1.png","btn-level1.png","level1")
-		startMenu.AddButton("btn-level2.png","btn-level2.png","level2")
-		startMenu.AddButton("btn-level3.png","btn-level3.png","level3")
-		startMenu.AddButton("btn-level4.png","btn-level4.png","level4")
-		startMenu.AddButton("btn-level5.png","btn-level5.png","level5")
+  Method Start:Void()
+    game.screenFade.Start(50, False)
+    gameScreen = New GameScreen
 
+    startMenu = New SimpleMenu("","",SCREEN_WIDTH2/2,100,50,True)
+    startMenu.AddButton("btn-level1.png","btn-level1.png","level1")
+    startMenu.AddButton("btn-level2.png","btn-level2.png","level2")
+    startMenu.AddButton("btn-level3.png","btn-level3.png","level3")
+    startMenu.AddButton("btn-level4.png","btn-level4.png","level4")
+    startMenu.AddButton("btn-level5.png","btn-level5.png","level5")
 	End
         
 	Method Render:Void()
 		Cls
 		startMenu.Draw()
-		
 	End
         
 	Method Update:Void()
