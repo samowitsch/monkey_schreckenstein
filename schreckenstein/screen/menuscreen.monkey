@@ -45,7 +45,7 @@ Class MenuScreen Extends Screen
 		If startMenu.Clicked("level2")
 			currentLevel = "maps/schreck-lvl2.xml"
 			game.screenFade.Start(50, True)
-			game.nextScreen = gameScreen
+            game.nextScreen = gameScreen
 		End
 		If startMenu.Clicked("level3")
 			currentLevel = "maps/schreck-lvl3.xml"
@@ -56,7 +56,7 @@ Class MenuScreen Extends Screen
 		If startMenu.Clicked("level4")
 			currentLevel = "maps/schreck-lvl1.xml"
 			game.screenFade.Start(50, True)
-			game.nextScreen = gameScreen
+            game.nextScreen = gameScreen
 		End
 		If startMenu.Clicked("level5")
 			currentLevel = "maps/schreck-lvl1.xml"

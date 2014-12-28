@@ -109,7 +109,7 @@ Class GameScreen Extends Screen
 
     player.Draw()
     
-    'DrawImage(toolbarlayer, 0, 0)				
+    DrawImage(toolbarlayer, 0, 0)				
     
     Self.ShowDebugInfo()
     
@@ -447,7 +447,7 @@ Class GameScreen Extends Screen
 		font.Draw(stat2, 10, 30)
 		
 		#If CONFIG="debug"
-			DrawText "X: " + MouseX + ", Y: " + MouseY, MouseX, MouseY
+			DrawText "X: " + MouseX() + ", Y: " + MouseY(), MouseX(), MouseY()
 		#End	
 	End
 End

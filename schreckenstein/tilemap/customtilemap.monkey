@@ -255,7 +255,8 @@ Class CustomTileMap Extends TileMap
 	
 	'get layer for collision checking
 	Method CheckHitInit:Void()
-		Self.layer = Self.layers.GetFirst()
+'		Self.layer = Self.layers.GetFirst()
+		Self.layer = Self.layers.GetItem(0)
 		Self.tl = TileMapTileLayer(layer)
 	End Method 
 	
